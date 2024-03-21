@@ -56,24 +56,70 @@
 
 	// Header Panel.
 
-// Nav.
-var $nav_li_a = $nav.find('li a');
+		// Nav.
+			var $nav_a = $nav.find('a');
 
-$nav_li_a.on('click', function(event) {
-    var $this = $(this);
+			$nav_a
+				.addClass('scrolly')
+				.on('click', function() {
 
-    // External link? Bail.
-    if ($this.attr('href').charAt(0) !== '#') return;
+					var $this = $(this);
 
-    // Deactivate all links.
-    $nav.find('li a').removeClass('active');
+					// External link? Bail.
+						if ($this.attr('href').charAt(0) != '#')
+							return;
 
-    // Activate clicked link.
-    $this.addClass('active');
+					// Deactivate all links.
+						$nav_a.removeClass('active');
 
-    // Prevent default anchor click behavior
-    event.preventDefault();
-});
+					// Activate link *and* lock it (so Scrollex doesn't try to activate other links as we're scrolling to this one's section).
+						$this
+							.addClass('active')
+							.addClass('active-locked');
+
+				})
+				.each(function() {
+
+					var	$this = $(this),
+						id = $this.attr('href'),
+						$section = $(id);
+
+					// No section for this link? Bail.
+						if ($section.length < 1)
+							return;
+
+					// Scrollex.
+						$section.scrollex({
+							mode: 'middle',
+							top: '5vh',
+							bottom: '5vh',
+							initialize: function() {
+
+								// Deactivate section.
+									$section.addClass('inactive');
+
+							},
+							enter: function() {
+
+								// Activate section.
+									$section.removeClass('inactive');
+
+								// No locked links? Deactivate all links and activate this section's one.
+									if ($nav_a.filter('.active-locked').length == 0) {
+
+										$nav_a.removeClass('active');
+										$this.addClass('active');
+
+									}
+
+								// Otherwise, if this section's link is the one that's locked, unlock it.
+									else if ($this.hasClass('active-locked'))
+										$this.removeClass('active-locked');
+
+							}
+						});
+
+				});
 
 		// Title Bar.
 			$titleBar = $(
